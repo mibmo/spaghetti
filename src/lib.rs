@@ -15,7 +15,7 @@ pub struct RedirectDb(diesel::pg::PgConnection);
 
 use schema::redirects;
 impl RedirectDb {
-    pub fn get_all_redirects(&self) -> QueryResult<QVec<Redirect>> {
+    pub fn get_all_redirects(&self) -> QueryResult<Vec<Redirect>> {
         let conn = &self.0;
 
         redirects::table
