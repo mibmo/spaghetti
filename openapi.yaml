@@ -1,0 +1,45 @@
+openapi: 3.0.3
+info:
+  title: Spaghetti Redirector
+  version: 0.1.0
+  description: Simple Actix-web redirector webapp.
+servers:
+- url: http://localhost:3000
+  description: Sample project running locally
+paths:
+  /:
+    get:
+      operationId: index
+      summary: Index page for creating redirects
+      description: Shows the index page for submitting redirects.
+      tags:
+        - web
+  /new:
+    post:
+      operationId: newRedirect
+      summary: Creates a new redirect
+      description: Creates a new redirect with a given URL
+      tags:
+        - redirect
+      parameters:
+        - name: url
+          in: header
+          schema:
+            type: string
+            format: url
+          required: true
+  /{redirectId}:
+    get:
+      operationId: getRedirect
+      summary: Returns HTTP temporary redirect to the URL for the corresponding redirectId
+      description: "Fetches the corresponding URL for the `redirectId` from
+        a data source and returns a HTTP 307 Temporary Redirect the said URL."
+      tags:
+        - redirect
+      parameters:
+        - name: redirectId
+          in: path
+          schema:
+            type: string
+            format: id
+          required: true
