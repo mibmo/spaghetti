@@ -1,6 +1,6 @@
 # Nightly image needed for Rocket v0.4.6
 ARG BUILD_IMAGE=ekidd/rust-musl-builder:nightly-2021-01-01
-ARG RUNNER_IMAGE=alpine:latest
+ARG RUNNER_IMAGE=scratch
 
 FROM ${BUILD_IMAGE} AS build
 
@@ -19,7 +19,7 @@ FROM ${RUNNER_IMAGE}
 #RUN apk --no-cache add ca-certificates
 COPY --from=build \
     /home/rust/src/target/x86_64-unknown-linux-musl/release/server \
-    /usr/local/bin
+    /usr/local/bin/
 ADD Rocket.toml ./
 
 ENTRYPOINT [ "/usr/local/bin/server" ] 
