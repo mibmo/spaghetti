@@ -48,10 +48,7 @@ fn new_redirect(conn: DbConn, new_redirect: Form<NewRedirect>) -> Result<String,
 
     match conn.create_redirect(&url.to_string()) {
         Err(_) => return Err(Status::InternalServerError),
-        Ok(id) => {
-            let encoded = base64::encode_config(id.to_string(), BASE64_ENCODE_CONFIG);
-            Ok(encoded)
-        },
+        Ok(id) => Ok(encode_id(id))
     }
 }
 
@@ -71,13 +68,13 @@ fn redirector(conn: DbConn, encoded_id: String) -> String {
 
 /// Decodes a byte buffer into an ID
 // @TODO: use webnum
-fn decode_id(encoded_id: AsRef<&[u8]>) -> anyhow::Result<i32> {
+fn decode_id<T: AsRef<[u8]>>(encoded_id: T) -> anyhow::Result<i32> {
     Ok(std::str::from_utf8(&base64::decode_config(encoded_id, BASE64_ENCODE_CONFIG)?)?.parse::<i32>()?)
 }
 
 /// Encodes an ID to a efficient string format
-fn encode_id(encoded_id: AsRef<&[u8]>) -> anyhow::Result<i32> {
-    Ok(0)
+fn encode_id(id: i32) -> String {
+    base64::encode_config(id.to_string(), BASE64_ENCODE_CONFIG)
 }
 
 /// Parses a URL and performs validation checks, such that it can be reasonably trusted.
