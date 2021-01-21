@@ -80,7 +80,7 @@ fn new_redirect(conn: DbConn, new_redirect: Form<NewRedirectForm>) -> Json<Redir
 #[get("/<id>")]
 fn redirector(conn: DbConn, id: String) -> Redirect {
     match conn.get_redirect_with_id(&id) {
-        Err(e) => Redirect::to(uri!(index)), // redirect to index when not found
+        Err(_) => Redirect::to(uri!(index)), // redirect to index when not found
         Ok(redirect) => Redirect::to(redirect.url),
     }
 }
