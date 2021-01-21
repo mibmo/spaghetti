@@ -12,6 +12,7 @@ use rocket::{
 use rocket_contrib::json::Json;
 
 use anyhow::{anyhow, bail};
+use serde::Serialize;
 use url::Url;
 
 use spaghetti::RedirectDb as DbConn;
@@ -22,6 +23,12 @@ const BASE64_ENCODE_CONFIG: base64::Config = base64::URL_SAFE_NO_PAD;
 #[derive(FromForm)]
 struct NewRedirectForm {
     url: String,
+}
+
+#[derive(Serialize)]
+struct RedirectResponse {
+    error: String,
+    id: String,
 }
 
 #[get("/")]
@@ -44,15 +51,26 @@ fn show_all_redirects(conn: DbConn) -> String {
 }
 
 #[post("/new", data = "<new_redirect>")]
-fn new_redirect(conn: DbConn, new_redirect: Form<NewRedirectForm>) -> Result<String, Status> {
+fn new_redirect(conn: DbConn, new_redirect: Form<NewRedirectForm>) -> Json<RedirectResponse> {
+    // this isn't a very clean way to return
+    // fallible json but it'll suffice
+
+    let error_response = RedirectResponse {
+        error: "failed to create redirect".to_string(),
+        id: "".to_string(),
+    };
+
     let url = match parse_url(&new_redirect.url) {
+        Err(_) => return Json(error_response),
         Ok(url) => url,
-        Err(e) => return Ok(format!("Error: {}", e)), //return Err(Status::BadRequest), // @TODO: Return error page, maybe?
     };
 
     match conn.create_redirect(&url.to_string()) {
-        Err(_) => return Err(Status::InternalServerError),
-        Ok(id) => Ok(id),
+        Err(_) => Json(error_response),
+        Ok(id) => Json(RedirectResponse {
+            error: "".to_string(),
+            id: id.to_string(),
+        })
     }
 }
 
