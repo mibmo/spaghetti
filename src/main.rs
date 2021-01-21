@@ -58,10 +58,10 @@ fn new_redirect(conn: DbConn, new_redirect: Form<NewRedirectForm>) -> Result<Str
 
 /// ID is a base64-encoded int32 value
 #[get("/<id>")]
-fn redirector(conn: DbConn, id: String) -> String {
+fn redirector(conn: DbConn, id: String) -> Redirect {
     match conn.get_redirect_with_id(&id) {
-        Err(e) => return format!("Database error: {}", e),
-        Ok(redirect) => format!("ID: {}, URL: {}", redirect.id, redirect.url),
+        Err(e) => Redirect::to(uri!(index)), // redirect to index when not found
+        Ok(redirect) => Redirect::to(redirect.url),
     }
 }
 
