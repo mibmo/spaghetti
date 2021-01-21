@@ -1,6 +1,6 @@
 table! {
     redirects (id) {
-        id -> Int4,
+        id -> Text,
         url -> Text,
     }
 }

@@ -1,15 +1,14 @@
 use super::schema::redirects;
 
-use rocket::request::FromForm;
-
 #[derive(Queryable)]
 pub struct Redirect {
-    pub id: i32,
+    pub id: String,
     pub url: String,
 }
 
-#[derive(Insertable, FromForm)]
+#[derive(Insertable)]
 #[table_name="redirects"]
 pub struct NewRedirect {
+    pub id: String,
     pub url: String,
 }
