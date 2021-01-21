@@ -7,7 +7,7 @@ pub struct Redirect {
 }
 
 #[derive(Insertable)]
-#[table_name="redirects"]
+#[table_name = "redirects"]
 pub struct NewRedirect {
     pub id: String,
     pub url: String,

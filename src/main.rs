@@ -1,13 +1,18 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
 extern crate openssl;
-#[macro_use] extern crate rocket;
+#[macro_use]
+extern crate rocket;
 
-use rocket::{request::{FromForm, Form}, http::Status};
+use rocket::{
+    http::Status,
+    request::{Form, FromForm},
+    response::Redirect,
+};
 use rocket_contrib::json::Json;
 
+use anyhow::{anyhow, bail};
 use url::Url;
-use anyhow::{bail, anyhow};
 
 use spaghetti::RedirectDb as DbConn;
 
@@ -24,29 +29,30 @@ fn index() -> &'static str {
     "Hello there!\nGeneral Kenobi..."
 }
 
+// @TODO: remove endpoint
 #[get("/all")]
 fn show_all_redirects(conn: DbConn) -> String {
     match conn.get_all_redirects() {
         Err(e) => format!("Database error: {}", e),
-        Ok(redirects) => redirects.into_iter()
+        Ok(redirects) => redirects
+            .into_iter()
             .map(|req| (req.id, req.url))
             .map(|(id, url)| format!("ID: {:5}\t URL: {}", id, url))
             .collect::<Vec<String>>()
             .join("\n"),
     }
-
 }
 
 #[post("/new", data = "<new_redirect>")]
 fn new_redirect(conn: DbConn, new_redirect: Form<NewRedirectForm>) -> Result<String, Status> {
     let url = match parse_url(&new_redirect.url) {
         Ok(url) => url,
-        Err(e) => return Ok(format!("Error: {}", e))//return Err(Status::BadRequest), // @TODO: Return error page, maybe?
+        Err(e) => return Ok(format!("Error: {}", e)), //return Err(Status::BadRequest), // @TODO: Return error page, maybe?
     };
 
     match conn.create_redirect(&url.to_string()) {
         Err(_) => return Err(Status::InternalServerError),
-        Ok(id) => Ok(id)
+        Ok(id) => Ok(id),
     }
 }
 
@@ -68,7 +74,10 @@ fn parse_url(url: &str) -> anyhow::Result<Url> {
     };
 
     // is scheme valid
-    if !ALLOWED_URL_SCHEMES.iter().any(|&scheme| scheme == url.scheme()) {
+    if !ALLOWED_URL_SCHEMES
+        .iter()
+        .any(|&scheme| scheme == url.scheme())
+    {
         bail!("URL scheme {} is not a valid scheme", url.scheme());
     }
 
@@ -77,8 +86,8 @@ fn parse_url(url: &str) -> anyhow::Result<Url> {
     // slight magic ensues
     match url.host_str() {
         None => bail!("No host specified"),
-        Some(host) =>  match host.find('.') {
-            Some(v) if v == 0 || v == host.len()-1 => bail!("No TLD specified"), // if the period is the first or last character
+        Some(host) => match host.find('.') {
+            Some(v) if v == 0 || v == host.len() - 1 => bail!("No TLD specified"), // if the period is the first or last character
             None => return Err(no_domain_error),
             _ => (),
         },
@@ -92,12 +101,7 @@ fn parse_url(url: &str) -> anyhow::Result<Url> {
 }
 
 fn main() {
-    let routes = routes![
-        index,
-        show_all_redirects,
-        new_redirect,
-        redirector,
-    ];
+    let routes = routes![index, show_all_redirects, new_redirect, redirector,];
 
     rocket::ignite()
         .mount("/", routes)

@@ -3,16 +3,16 @@ extern crate diesel;
 #[macro_use]
 extern crate rocket_contrib;
 
-use rand::{prelude::*, Rng, distributions::Alphanumeric};
 use diesel::prelude::*;
+use rand::{distributions::Alphanumeric, prelude::*, Rng};
 
-pub mod schema;
 pub mod models;
+pub mod schema;
 
 use models::*;
 
 const ID_LENGTH: usize = 5;
- 
+
 #[database("redirect_db")]
 pub struct RedirectDb(diesel::pg::PgConnection);
 
@@ -21,8 +21,7 @@ impl RedirectDb {
     pub fn get_all_redirects(&self) -> QueryResult<Vec<Redirect>> {
         let conn = &self.0;
 
-        redirects::table
-            .load::<Redirect>(conn)
+        redirects::table.load::<Redirect>(conn)
     }
 
     pub fn create_redirect(&self, url: &str) -> QueryResult<String> {
@@ -30,7 +29,7 @@ impl RedirectDb {
 
         // inefficient. has to wait for system entropy as well
         // consider using nanoid crate
-        let rng = SmallRng::from_entropy(); 
+        let rng = SmallRng::from_entropy();
         let random_id: String = rng
             .sample_iter(&Alphanumeric)
             .take(ID_LENGTH)
