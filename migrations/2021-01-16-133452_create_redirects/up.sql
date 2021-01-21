@@ -1,4 +1,4 @@
 CREATE TABLE redirects (
-    id SERIAL PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     url TEXT NOT NULL
 )
