@@ -3,20 +3,21 @@
 extern crate openssl;
 #[macro_use] extern crate rocket;
 
-use rocket::{request::Form, http::Status};
+use rocket::{request::{FromForm, Form}, http::Status};
 use rocket_contrib::json::Json;
 
 use url::Url;
 use anyhow::{bail, anyhow};
 
-
-use spaghetti::{
-    RedirectDb as DbConn,
-    models::NewRedirect,
-};
+use spaghetti::RedirectDb as DbConn;
 
 const ALLOWED_URL_SCHEMES: [&str; 3] = ["http", "https", "ftp"];
 const BASE64_ENCODE_CONFIG: base64::Config = base64::URL_SAFE_NO_PAD;
+
+#[derive(FromForm)]
+struct NewRedirectForm {
+    url: String,
+}
 
 #[get("/")]
 fn index() -> &'static str {
@@ -24,14 +25,12 @@ fn index() -> &'static str {
 }
 
 #[get("/all")]
-// @TODO: use webnum
 fn show_all_redirects(conn: DbConn) -> String {
     match conn.get_all_redirects() {
         Err(e) => format!("Database error: {}", e),
         Ok(redirects) => redirects.into_iter()
             .map(|req| (req.id, req.url))
-            .map(|(id, url)| (base64::encode_config(id.to_string(), BASE64_ENCODE_CONFIG), url))
-            .map(|(id, url)| format!("ID: {:4}\t URL: {}", id, url))
+            .map(|(id, url)| format!("ID: {:5}\t URL: {}", id, url))
             .collect::<Vec<String>>()
             .join("\n"),
     }
@@ -39,8 +38,7 @@ fn show_all_redirects(conn: DbConn) -> String {
 }
 
 #[post("/new", data = "<new_redirect>")]
-// @TODO: use webnum
-fn new_redirect(conn: DbConn, new_redirect: Form<NewRedirect>) -> Result<String, Status> {
+fn new_redirect(conn: DbConn, new_redirect: Form<NewRedirectForm>) -> Result<String, Status> {
     let url = match parse_url(&new_redirect.url) {
         Ok(url) => url,
         Err(e) => return Ok(format!("Error: {}", e))//return Err(Status::BadRequest), // @TODO: Return error page, maybe?
@@ -48,33 +46,17 @@ fn new_redirect(conn: DbConn, new_redirect: Form<NewRedirect>) -> Result<String,
 
     match conn.create_redirect(&url.to_string()) {
         Err(_) => return Err(Status::InternalServerError),
-        Ok(id) => Ok(encode_id(id))
+        Ok(id) => Ok(id)
     }
 }
 
 /// ID is a base64-encoded int32 value
-#[get("/<encoded_id>")]
-fn redirector(conn: DbConn, encoded_id: String) -> String {
-    let id = match decode_id(encoded_id) {
-        Ok(n) => n,
-        Err(_) => return format!("Not a valid ID"),
-    };
-
-    match conn.get_redirect_with_id(id) {
+#[get("/<id>")]
+fn redirector(conn: DbConn, id: String) -> String {
+    match conn.get_redirect_with_id(&id) {
         Err(e) => return format!("Database error: {}", e),
         Ok(redirect) => format!("ID: {}, URL: {}", redirect.id, redirect.url),
     }
-}
-
-/// Decodes a byte buffer into an ID
-// @TODO: use webnum
-fn decode_id<T: AsRef<[u8]>>(encoded_id: T) -> anyhow::Result<i32> {
-    Ok(std::str::from_utf8(&base64::decode_config(encoded_id, BASE64_ENCODE_CONFIG)?)?.parse::<i32>()?)
-}
-
-/// Encodes an ID to a efficient string format
-fn encode_id(id: i32) -> String {
-    base64::encode_config(id.to_string(), BASE64_ENCODE_CONFIG)
 }
 
 /// Parses a URL and performs validation checks, such that it can be reasonably trusted.
