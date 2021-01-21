@@ -4,12 +4,13 @@ extern crate openssl;
 #[macro_use]
 extern crate rocket;
 
+use std::collections::HashMap;
+
 use rocket::{
-    http::Status,
     request::{Form, FromForm},
     response::Redirect,
 };
-use rocket_contrib::json::Json;
+use rocket_contrib::{json::Json, templates::Template};
 
 use anyhow::{anyhow, bail};
 use serde::Serialize;
@@ -32,8 +33,9 @@ struct RedirectResponse {
 }
 
 #[get("/")]
-fn index() -> &'static str {
-    "Hello there!\nGeneral Kenobi..."
+fn index() -> Template {
+    let context: HashMap<(), ()> = HashMap::new();
+    Template::render("index", &context)
 }
 
 // @TODO: remove endpoint
@@ -124,5 +126,6 @@ fn main() {
     rocket::ignite()
         .mount("/", routes)
         .attach(DbConn::fairing())
+        .attach(Template::fairing())
         .launch();
 }

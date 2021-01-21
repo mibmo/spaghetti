@@ -21,5 +21,6 @@ COPY --from=build \
     /home/rust/src/target/x86_64-unknown-linux-musl/release/server \
     /usr/local/bin/
 ADD Rocket.toml ./
+ADD templates ./templates
 
 ENTRYPOINT [ "/usr/local/bin/server" ] 
