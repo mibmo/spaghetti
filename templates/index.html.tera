@@ -1,1 +1,16 @@
-hey! <3
+{% extends "base" %}
+{% block title %}Spaghetti{% endblock title %}
+{% block content %}
+
+<div class="flex flex-row h-screen w-screen">
+    <div style="background-color: #09F911" class="w-1/5" ></div>
+    <div style="background-color: #029D74" class="w-1/5" ></div>
+    <div style="background-color: #E35BD8" class="w-1/5" ></div>
+    <div style="background-color: #4156C5" class="w-1/5" ></div>
+    <div style="background-color: #635688" class="w-1/5 flex flex-col justify-end p-4 text-white text-6xl">
+      +C0
+    </div>
+</div>
+
+{% endblock content %}
+{# vim:set ft=html: #}
