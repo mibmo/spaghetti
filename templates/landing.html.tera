@@ -3,48 +3,47 @@
 {% block content %}
 
 <div class="flex flex-col h-screen bg-gray-200">
-  <nav class="flex flex-row justify-between items-center p-4 h-16 flex-none border-b-2 shadow-lg bg-gray-100  border-gray-500">
-    <div class="flex flex-row">
-      <svg class="h-6 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-      </svg>
-      <strong class="ml-2 font-bold uppercase">
-        Spaghetti
-      </strong>
-    </div>
-    <span class="mr-14 mt-0.5 text-sm italic">
-      Your link shortener of choice.
-    </span>
-    <div>
-      <!-- when not bookmarked -->
-      <svg class="h-6 text-black" id="bookmark-false" onclick="toggleBookmark()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-      </svg>
-      <!-- when bookmarked -->
-      <svg class="h-6 text-black hidden" id="bookmark-true" onclick="toggleBookmark()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-        <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
-      </svg>
-    </div>
-  </nav>
+    <nav class="flex flex-row justify-between items-center p-4 h-16 flex-none border-b-2 shadow-lg bg-gray-100  border-gray-500">
+        <div class="flex flex-row">
+            <svg class="h-6 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+            <strong class="ml-2 font-bold uppercase">
+                Spaghetti
+            </strong>
+        </div>
+        <span class="mr-14 mt-0.5 text-sm italic">
+            Your link shortener of choice.
+        </span>
+        <div>
+            <!-- when not bookmarked -->
+            <svg class="h-6 text-black" id="bookmark-false" onclick="toggleBookmark()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+            <!-- when bookmarked -->
+            <svg class="h-6 text-black hidden" id="bookmark-true" onclick="toggleBookmark()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+            </svg>
+        </div>
+    </nav>
 
-  <div class="flex justify-center h-full items-start pt-32 md:items-center md:pt-0 md:pb-32">
-    <div class="flex flex-col justify-center w-72 md:w-96">
-      <div class="m-4 p-2 rounded-full border-2 border-gray-400 bg-white">
-        <input class="text-black placeholder-black mx-4" type="text" placeholder="Link to shorten" />
-      </div>
-      <button>
-        <strong>Submit</strong>
-      </button>
+    <div class="flex justify-center h-full items-start pt-32 md:items-center md:pt-0 md:pb-32">
+        <div class="flex flex-col justify-center w-72 md:w-96">
+            <div class="m-4 p-2 rounded-full border-2 border-gray-400 bg-white">
+                <input class="text-black placeholder-black mx-4" type="text" placeholder="Link to shorten" />
+            </div>
+            <button>
+                <strong>Submit</strong>
+            </button>
+        </div>
     </div>
-  </div>
-  <div class="flex flex-row flex-none h-8 justify-center">
-    BOTTOM
-  </div>
+    <div class="flex flex-row flex-none h-8 justify-center">
+        BOTTOM
+    </div>
 </div>
 
 <script>
 function toggleBookmark() {
-  alert("test!");
+    alert("test!");
 }
 toggleBookmark();
 </script>
