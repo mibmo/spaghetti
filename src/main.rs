@@ -103,7 +103,7 @@ fn parse_url(url: &str) -> anyhow::Result<Url> {
 
     let no_domain_error = anyhow!("URL does not have a domain");
 
-    // slight magic ensues
+    // slight magic ensues. might be redundant because of url.domain.is_none()
     match url.host_str() {
         None => bail!("No host specified"),
         Some(host) => match host.find('.') {
