@@ -33,9 +33,9 @@ struct RedirectResponse {
 }
 
 #[get("/")]
-fn index() -> Template {
+fn landing() -> Template {
     let context: HashMap<(), ()> = HashMap::new();
-    Template::render("index", &context)
+    Template::render("landing", &context)
 }
 
 // @TODO: remove endpoint
@@ -80,7 +80,7 @@ fn new_redirect(conn: DbConn, new_redirect: Form<NewRedirectForm>) -> Json<Redir
 #[get("/<id>")]
 fn redirector(conn: DbConn, id: String) -> Redirect {
     match conn.get_redirect_with_id(&id) {
-        Err(_) => Redirect::to(uri!(index)), // redirect to index when not found
+        Err(_) => Redirect::to(uri!(landing)), // redirect to landing when not found
         Ok(redirect) => Redirect::to(redirect.url),
     }
 }
@@ -121,7 +121,7 @@ fn parse_url(url: &str) -> anyhow::Result<Url> {
 }
 
 fn main() {
-    let routes = routes![index, show_all_redirects, new_redirect, redirector,];
+    let routes = routes![landing, show_all_redirects, new_redirect, redirector,];
 
     rocket::ignite()
         .mount("/", routes)
