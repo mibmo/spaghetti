@@ -12,28 +12,38 @@
                 Spaghetti
             </strong>
         </div>
-        <span class="mr-14 mt-0.5 text-sm italic">
+        <span class="mr-14 mt-0.5 text-sm italic invisible md:visible">
             Your link shortener of choice.
         </span>
         <div>
-            <!-- when not bookmarked -->
-            <svg class="h-6 text-black" id="bookmark-false" onclick="toggleBookmark()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-            </svg>
-            <!-- when bookmarked -->
-            <svg class="h-6 text-black hidden" id="bookmark-true" onclick="toggleBookmark()" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+            <svg class="h-6 w-6 text-black animate-pulse" id="bookmark" onclick="bookmarkButton()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
         </div>
     </nav>
 
-    <div class="flex justify-center h-full items-start pt-32 md:items-center md:pt-0 md:pb-32">
-        <div class="flex flex-col justify-center w-72 md:w-96">
+    <div class="flex flex-col items-center h-full items-start pt-32 md:justify-center md:pt-0 md:pb-32">
+
+        <div class="rounded-lg m-8 p-4 text-center border-2 border-red-700 text-red-500 bg-red-200" id="js-reminder">
+            Sorry, but this website doesn't work without Javscript.<br>
+            I know; I hate Javascript too, but it's a necessary evil.<br>
+            Please consider enabling it.
+        </div>
+
+        <div class="flex flex-col justify-center items-center w-72 md:w-96 hidden" id="submit-container">
             <div class="m-4 p-2 rounded-full border-2 border-gray-400 bg-white">
-                <input class="text-black placeholder-black mx-4" type="text" placeholder="Link to shorten" />
+                <input id="redirect-url-input" class="text-black placeholder-black mx-4" type="text" placeholder="Link to shorten" autofocus autocomplete="off" />
             </div>
             <button>
-                <strong>Submit</strong>
+                <strong class="hover:underline" onclick="sendRedirectRequest()">Submit</strong>
             </button>
+
+            <span class="mt-2 mb-2 h-2 invisible" id="redirect-id-container">
+                Redirect ID: <code class="cursor-pointer hover:underline" id="redirect-id-text"></code>
+            </span>
+            <div class="mt-2 h-2 text-center -mt-4 invisible" id="redirect-error-container">
+                An error occured submitting link.<br>
+                Click <code class="cursor-pointer hover:underline" onclick="location.reload()">here</code> to reload the page.
+            </div>
         </div>
     </div>
     <div class="flex flex-row flex-none h-8 justify-center">
@@ -42,10 +52,92 @@
 </div>
 
 <script>
-function toggleBookmark() {
-    alert("test!");
+const elemBookmark = document.getElementById("bookmark");
+const elemRedirectInput = document.getElementById("redirect-url-input");
+const elemRedirectText = document.getElementById("redirect-id-text");
+const elemRedirectContainer = document.getElementById("redirect-id-container");
+const elemErrorContainer = document.getElementById("redirect-error-container");
+
+const urlRegex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/; // urlregex.com
+
+var hasCreatedRedirect = false;
+
+function bookmarkButton() {
+    elemBookmark.classList.toggle("fill-current");
+    elemBookmark.classList.toggle("animate-pulse");
+
+    if (elemBookmark.classList.contains("fill-current")) {
+        bookmarkPopup();
+    }
 }
-toggleBookmark();
+
+function sendRedirectRequest() {
+    let url = elemRedirectInput.value;
+
+    if (hasCreatedRedirect) { return; }
+    hasCreatedRedirect = true;
+
+    if (!url.match(urlRegex)) { return; } // client-side validation
+
+    var req = new XMLHttpRequest();
+    req.open('POST', '/new', true);
+    req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    req.overrideMimeType("application/json");
+
+    req.onload = () => {
+        elemRedirectInput.value = "";
+
+        let resp = JSON.parse(req.responseText);
+        if (resp.error) {
+            redirectError();
+        } else {
+            redirectSuccess(resp.id);
+        }
+    };
+
+    req.send("url=" + url);
+}
+
+function redirectSuccess(id) {
+    redirect = id;
+    elemRedirectText.innerText = id;
+    elemRedirectContainer.classList.remove("invisible");
+}
+
+function redirectError() {
+    elemErrorContainer.classList.remove("invisible");
+}
+
+// annoying bookmark reminder
+// never do this
+function bookmarkPopup() {
+    alert("Please bookmark us!");
+}
+
+elemRedirectText.addEventListener("click", async(event) => {
+    if (!navigator.clipboard) {
+        // browser does not suport clipboard api
+        return; 
+    }
+
+    try {
+        let copyStr = window.location.href + redirect; // not fool proof, but it's _probably fine_
+        await navigator.clipboard.writeText(copyStr);
+    } catch (error) {
+        console.error("copy to clipboard failed", error);
+    }
+});
+
+elemRedirectInput.addEventListener("keypress", async(event) => {
+    if (event.keyCode == 13) { // enter key
+        sendRedirectRequest()
+    }
+});
+
+// javascript enabled popup
+document.getElementById("js-reminder").classList.add("hidden");
+document.getElementById("submit-container").classList.remove("hidden");
+
 </script>
 
 {% endblock content %}
