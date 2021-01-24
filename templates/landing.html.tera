@@ -100,7 +100,7 @@ function sendRedirectRequest() {
 
 function redirectSuccess(id) {
     redirect = id;
-    elemRedirectText.innerText = id;
+    elemRedirectText.innerText = window.location.href + id;
     elemRedirectContainer.classList.remove("invisible");
 }
 
