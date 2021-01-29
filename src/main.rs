@@ -72,7 +72,7 @@ fn new_redirect(conn: DbConn, new_redirect: Form<NewRedirectForm>) -> Json<Redir
         Ok(id) => Json(RedirectResponse {
             error: "".to_string(),
             id: id.to_string(),
-        })
+        }),
     }
 }
 
