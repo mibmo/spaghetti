@@ -121,7 +121,7 @@ fn parse_url(url: &str) -> anyhow::Result<Url> {
 }
 
 fn main() {
-    let routes = routes![landing, show_all_redirects, new_redirect, redirector,];
+    let routes = routes![landing, show_all_redirects, new_redirect, redirector];
 
     rocket::ignite()
         .mount("/", routes)
